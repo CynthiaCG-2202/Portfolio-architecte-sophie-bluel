@@ -145,6 +145,7 @@ body {
     margin: auto;
     font-family: 'Work Sans';
     font-size: 14px;
+    background-color: #FFFEF8
 }
 
 header {
@@ -221,6 +222,27 @@ input {
     width: 379px;
     height: 51px;
     border: none;
+}
+
+.login-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+input[type="submit"] {
+    font-family: 'Syne';
+    font-weight: 700;
+    color: white;
+    background-color: #1D6154;
+    margin: 2em auto;
+    width: 180px;
+    text-align: center;
+    border-radius: 60px;
+}
+
+.login-message {
+    text-decoration: underline;
 }
 
 footer nav ul {

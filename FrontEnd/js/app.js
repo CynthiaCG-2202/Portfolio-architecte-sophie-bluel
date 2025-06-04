@@ -1,9 +1,9 @@
-// Sélection des éléments
+// Sélection des éléments HTML (galerie / filtre)
 const gallery = document.querySelector(".gallery");
 const filtersContainer = document.querySelector(".filters");
 let allWorks = [];
 
-// Fonction d'affichage des projets filtrés
+// Fonction filtres des catégories
 function displayFilteredWorks(categoryId) {
     gallery.innerHTML = "";
 
@@ -27,7 +27,7 @@ function displayFilteredWorks(categoryId) {
     });
 }
 
-// Récupération des travaux depuis l’API
+// Récupération API des projets (fetch)
 fetch("http://localhost:5678/api/works")
     .then(res => res.json())
     .then(works => {
@@ -36,7 +36,7 @@ fetch("http://localhost:5678/api/works")
     })
     .catch(error => console.error("Erreur lors de la récupération des travaux :", error));
 
-// Récupération des catégories depuis l’API et création des boutons filtres
+// Récupération API des catégories
 fetch("http://localhost:5678/api/categories")
     .then(res => res.json())
     .then(categories => {
