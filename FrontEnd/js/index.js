@@ -28,6 +28,8 @@ function displayFilteredWorks(categoryId) {
 }
 
 // Récupération API des projets (fetch)
+
+//getworks
 fetch("http://localhost:5678/api/works")
     .then(res => res.json())
     .then(works => {
@@ -37,11 +39,9 @@ fetch("http://localhost:5678/api/works")
     .catch(error => console.error("Erreur lors de la récupération des travaux :", error));
 
 // Récupération API des catégories
-fetch("http://localhost:5678/api/categories")
-    .then(res => res.json())
-    .then(categories => {
-        // Ajoute un bouton "Tous"
-        const allButton = document.createElement("button");
+
+function displaycategories(categories){
+const allButton = document.createElement("button");
         allButton.textContent = "Tous";
         allButton.classList.add("filter-btn", "active");
         allButton.dataset.id = 0;
@@ -69,5 +69,19 @@ fetch("http://localhost:5678/api/categories")
                 displayFilteredWorks(categoryId);
             });
         });
-    })
-    .catch(error => console.error("Erreur lors de la récupération des catégories :", error));
+}
+async function getcategories(){
+const res=await fetch("http://localhost:5678/api/categories")
+    const categories=res.json()
+    return categories
+    //.catch(error => console.error("Erreur lors de la récupération des catégories :", error));
+}
+
+async function init(){
+   const categories=await getcategories()
+   displaycategories(categories)
+   const works=await getworks()
+   displayFilteredWorks(works) // à faire
+}
+
+init()
