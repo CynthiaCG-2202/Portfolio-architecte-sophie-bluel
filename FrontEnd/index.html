@@ -7,6 +7,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+		integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w=="
+		crossorigin="anonymous" referrerpolicy="no-referrer">
 	<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Work+Sans&display=swap"
 		rel="stylesheet">
 	<meta name="description" content="">
@@ -14,13 +17,27 @@
 </head>
 
 <body>
+	<div id="admin-bar" class="admin-bar hidden">
+		<p><i class="fa-solid fa-pen-to-square"></i> Mode édition</p>
+	</div>
+
+	<div id="modal-edit-projects" class="hidden">
+		<div class="modal-content">
+			<span class="close-btn" aria-label="Fermer la fenêtre">&times;</span>
+			<h3>Modifier mes projets</h3>
+			<!-- Ici tu peux ajouter ton formulaire ou interface pour ajouter/supprimer des projets -->
+			<p>Ici, place ton contenu d'édition des projets...</p>
+		</div>
+	</div>
+
 	<header>
 		<h1>Sophie Bluel <span>Architecte d'intérieur</span></h1>
 		<nav>
 			<ul>
 				<li>projets</li>
 				<li>contact</li>
-				<a href="./Pages/login-page.html"><li>login</li></a>
+				<li id="login-logout">login</li>
+
 				<li><img src="./assets/icons/instagram.png" alt="Instagram"></li>
 			</ul>
 		</nav>
