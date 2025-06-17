@@ -28,3 +28,5 @@ document.querySelector(".login-form").addEventListener("submit", async (e) => {
         alert("Une erreur est survenue. Veuillez réessayer.");
     }
 });
+
+// fonction init à faire

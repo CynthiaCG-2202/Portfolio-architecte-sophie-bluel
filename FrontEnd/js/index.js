@@ -1,18 +1,18 @@
 // Sélection des éléments HTML (galerie / filtre)
 const gallery = document.querySelector(".gallery");
 const filtersContainer = document.querySelector(".filters");
-let allWorks = [];
 
 // Filtre des catégories
-function displayFilteredWorks(categoryId) {
+function displayFilteredWorks(categoryId, works) {
     gallery.innerHTML = "";
 
     const filteredWorks = categoryId === 0
-        ? allWorks
-        : allWorks.filter(work => work.categoryId === categoryId);
+        ? works
+        : works.filter(work => work.categoryId === categoryId);
 
     filteredWorks.forEach(work => {
         const figure = document.createElement("figure");
+        figure.dataset.id = work.id;  // Ajout pour faciliter suppression
 
         const img = document.createElement("img");
         img.src = work.imageUrl;
@@ -28,7 +28,9 @@ function displayFilteredWorks(categoryId) {
 }
 
 // Boutons des filtres et le bouton "tous"
-function displaycategories(categories) {
+function displaycategories(categories, works) {
+    filtersContainer.innerHTML = ""; // Vide au cas où
+
     const allButton = document.createElement("button");
     allButton.textContent = "Tous";
     allButton.classList.add("filter-btn", "active");
@@ -50,35 +52,40 @@ function displaycategories(categories) {
             button.classList.add("active");
 
             const categoryId = parseInt(button.dataset.id);
-            displayFilteredWorks(categoryId);
+            displayFilteredWorks(categoryId, works);
         });
     });
 }
 
 // Projets depuis l'API
 async function getworks() {
-    const res = await fetch("http://localhost:5678/api/works");
-    const works = await res.json();
-    allWorks = works;
-    return works;
+    try {
+        const res = await fetch("http://localhost:5678/api/works");
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const works = await res.json();
+        return works;
+    } catch (error) {
+        console.error("Erreur lors de la récupération des travaux :", error);
+        return [];  // Retourne un tableau vide si erreur
+    }
 }
 
 // Catégorie depuis l'API
 async function getcategories() {
-    const res = await fetch("http://localhost:5678/api/categories");
-    const categories = await res.json(); // <-- ajout de await ici
-    return categories;
+    try {
+        const res = await fetch("http://localhost:5678/api/categories");
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const categories = await res.json();
+        return categories;
+    } catch (error) {
+        console.error("Erreur lors de la récupération des catégories :", error);
+        return [];  // Retourne un tableau vide si erreur
+    }
 }
-
-// Récupération puis affichage
-async function init() {
-    const categories = await getcategories();
-    displaycategories(categories);
-    await getworks();
-    displayFilteredWorks(0);
-}
-
-init();
 
 function isLoggedIn() {
     return localStorage.getItem("token") !== null;
@@ -134,13 +141,13 @@ function addEditButtonToProjectsTitle() {
     // Texte + icône en span pour mieux contrôler le style
     editBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> modifier`;
 
-    editBtn.onclick = () => {
+    editBtn.addEventListener("click", () => {
         const modal = document.getElementById("modal-edit-projects");
         if (modal) {
             modal.classList.add("active");
             modal.classList.remove("hidden");
         }
-    };
+    });
 
     title.appendChild(editBtn);
 }
@@ -152,18 +159,92 @@ function setupModalClose() {
 
     const closeBtn = modal.querySelector(".close-btn");
     if (closeBtn) {
-        closeBtn.onclick = () => {
+        closeBtn.addEventListener("click", () => {
             modal.classList.remove("active");
             modal.classList.add("hidden");
-        };
+        });
     }
+
+    // Clic en dehors du contenu modal (sur l'overlay)
+    modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            modal.classList.remove("active");
+            modal.classList.add("hidden");
+        }
+    });
 }
 
-// À l'événement DOMContentLoaded, lance les setups
-document.addEventListener("DOMContentLoaded", () => {
+// Rajouté pour le modal avec suppression par icône en coin
+function displayWorksInModal(works) {
+    const modalGallery = document.querySelector("#modal-edit-projects .modal-gallery");
+    if (!modalGallery) return;
+
+    modalGallery.innerHTML = ""; // Vide le contenu avant
+
+    works.forEach(work => {
+        const figure = document.createElement("figure");
+        figure.dataset.id = work.id;
+
+        const img = document.createElement("img");
+        img.src = work.imageUrl;
+        img.alt = work.title;
+
+        // Création du bouton supprimer, qui sera positionné en CSS dans le coin supérieur gauche
+        const btnSuppr = document.createElement("button");
+        btnSuppr.classList.add("btn-suppr");
+        btnSuppr.dataset.id = work.id;
+        btnSuppr.setAttribute("aria-label", "Supprimer l'image");
+
+        // Icône poubelle FontAwesome
+        btnSuppr.innerHTML = '<i class="fa-solid fa-trash"></i>';
+
+        figure.appendChild(img);
+        figure.appendChild(btnSuppr);
+        modalGallery.appendChild(figure);
+    });
+
+    // Écouteurs sur les icônes supprimer
+    modalGallery.querySelectorAll(".btn-suppr").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+            const idToDelete = e.target.closest("button").dataset.id;
+
+            const confirmed = confirm("Voulez-vous vraiment supprimer ce travail ?");
+            if (!confirmed) return;
+
+            try {
+                const token = localStorage.getItem("token");
+                const res = await fetch(`http://localhost:5678/api/works/${idToDelete}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                if (!res.ok) throw new Error("Erreur lors de la suppression");
+
+                // Recharge tout l'affichage après suppression pour garder la synchro
+                await init();
+
+            } catch (err) {
+                alert(err.message);
+                console.error(err);
+            }
+        });
+    });
+}
+
+// Récupération puis affichage
+async function init() {
+    const works = await getworks();
+    displayFilteredWorks(0, works);
+    displayWorksInModal(works);
+    const categories = await getcategories();
+    displaycategories(categories, works);
     addEditButtonToProjectsTitle();
     setupModalClose();
     updateLoginLogoutButton();
     showAdminBar(isLoggedIn());
     toggleFilters(!isLoggedIn());
-});
+}
+
+init();
