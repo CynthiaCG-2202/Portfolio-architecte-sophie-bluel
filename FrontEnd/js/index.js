@@ -233,6 +233,99 @@ function displayWorksInModal(works) {
     });
 }
 
+// Rajouté pour éviter la duplication des écouteurs lors de plusieurs appels
+let modalSwitchingInitialized = false;
+
+function setupModalSwitching(categories) {
+    if (modalSwitchingInitialized) return; // ✅ évite les doublons
+    modalSwitchingInitialized = true;
+
+    const btnOpenAdd = document.getElementById("open-add-photo");
+    const viewGallery = document.querySelector(".modal-gallery-view");
+    const viewAdd = document.querySelector(".modal-add-view");
+    const backBtn = viewAdd.querySelector(".back-btn");
+
+    const categorySelect = document.getElementById("category");
+    const imageInput = document.getElementById("image-input");
+    const previewImage = document.getElementById("preview-image");
+    const previewContainer = document.getElementById("preview-container");
+
+    // Pré-remplir les catégories
+    categorySelect.innerHTML = "";
+    categories.forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat.id;
+        option.textContent = cat.name;
+        categorySelect.appendChild(option);
+    });
+
+    btnOpenAdd.addEventListener("click", () => {
+        viewGallery.classList.add("hidden");
+        viewAdd.classList.remove("hidden");
+    });
+
+    backBtn.addEventListener("click", () => {
+        viewAdd.classList.add("hidden");
+        viewGallery.classList.remove("hidden");
+
+        // Réinitialise le formulaire
+        document.getElementById("photo-form").reset();
+        previewContainer.classList.add("hidden");
+        previewImage.src = "";
+    });
+
+    imageInput.addEventListener("change", () => {
+        const file = imageInput.files[0];
+        if (file) {
+            previewImage.src = URL.createObjectURL(file);
+            previewContainer.classList.remove("hidden");
+        }
+    });
+
+    const form = document.getElementById("photo-form");
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const file = imageInput.files[0];
+        const title = document.getElementById("title").value;
+        const category = categorySelect.value;
+
+        if (!file || !title || !category) {
+            alert("Tous les champs sont requis.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("image", file);
+        formData.append("title", title);
+        formData.append("category", category);
+
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch("http://localhost:5678/api/works", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (!res.ok) throw new Error("Erreur lors de l'ajout de l'image");
+
+            // Recharge tout
+            await init();
+
+            // Revenir à la galerie
+            viewAdd.classList.add("hidden");
+            viewGallery.classList.remove("hidden");
+        } catch (err) {
+            alert(err.message);
+        }
+    });
+}
+
+
+
 // Récupération puis affichage
 async function init() {
     const works = await getworks();
@@ -245,6 +338,7 @@ async function init() {
     updateLoginLogoutButton();
     showAdminBar(isLoggedIn());
     toggleFilters(!isLoggedIn());
+    setupModalSwitching(categories);
 }
 
 init();
