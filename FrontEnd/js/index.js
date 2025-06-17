@@ -165,7 +165,7 @@ function setupModalClose() {
         });
     }
 
-    // Clic en dehors du contenu modal (sur l'overlay)
+    // Clic en dehors du contenu modal
     modal.addEventListener("click", (event) => {
         if (event.target === modal) {
             modal.classList.remove("active");
@@ -179,7 +179,7 @@ function displayWorksInModal(works) {
     const modalGallery = document.querySelector("#modal-edit-projects .modal-gallery");
     if (!modalGallery) return;
 
-    modalGallery.innerHTML = ""; // Vide le contenu avant
+    modalGallery.innerHTML = ""; // Vide le contenu
 
     works.forEach(work => {
         const figure = document.createElement("figure");
@@ -189,13 +189,12 @@ function displayWorksInModal(works) {
         img.src = work.imageUrl;
         img.alt = work.title;
 
-        // Création du bouton supprimer, qui sera positionné en CSS dans le coin supérieur gauche
+        // Bouton supprimer
         const btnSuppr = document.createElement("button");
         btnSuppr.classList.add("btn-suppr");
         btnSuppr.dataset.id = work.id;
         btnSuppr.setAttribute("aria-label", "Supprimer l'image");
 
-        // Icône poubelle FontAwesome
         btnSuppr.innerHTML = '<i class="fa-solid fa-trash"></i>';
 
         figure.appendChild(img);
@@ -233,11 +232,11 @@ function displayWorksInModal(works) {
     });
 }
 
-// Rajouté pour éviter la duplication des écouteurs lors de plusieurs appels
+// Rajouté pour éviter la duplication des images
 let modalSwitchingInitialized = false;
 
 function setupModalSwitching(categories) {
-    if (modalSwitchingInitialized) return; // ✅ évite les doublons
+    if (modalSwitchingInitialized) return; 
     modalSwitchingInitialized = true;
 
     const btnOpenAdd = document.getElementById("open-add-photo");
