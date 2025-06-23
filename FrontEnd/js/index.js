@@ -246,8 +246,23 @@ function setupModalSwitching(categories) {
     const categorySelect = document.getElementById("category");
     const imageInput = document.getElementById("image-input");
     const previewContainer = document.getElementById("preview-container");
+    const previewWrapper = document.getElementById("preview-wrapper");
+    const previewImage = document.getElementById("preview-image");
+    const uploadPlaceholder = document.getElementById("upload-placeholder");
 
+    const form = document.getElementById("photo-form");
+    const validateBtn = form.querySelector(".btn-modal");
+    const titleInput = document.getElementById("title");
+
+    // -- Remplir le select avec une option par défaut
     categorySelect.innerHTML = "";
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    defaultOption.textContent = "Choisissez une catégorie";
+    categorySelect.appendChild(defaultOption);
+
     categories.forEach(cat => {
         const option = document.createElement("option");
         option.value = cat.id;
@@ -255,54 +270,58 @@ function setupModalSwitching(categories) {
         categorySelect.appendChild(option);
     });
 
+    // -- Ouverture de la vue d'ajout
     btnOpenAdd.addEventListener("click", () => {
         viewGallery.classList.add("hidden");
         viewAdd.classList.remove("hidden");
     });
 
+    // -- Retour à la galerie
     backBtn.addEventListener("click", () => {
         viewAdd.classList.add("hidden");
         viewGallery.classList.remove("hidden");
 
-        document.getElementById("photo-form").reset();
-        previewContainer.classList.add("hidden");
+        form.reset();
+        previewWrapper.classList.add("hidden");
+        uploadPlaceholder.classList.remove("hidden");
         previewImage.src = "";
+        validateBtn.disabled = true; // réinitialise le bouton
     });
 
-    const uploadPlaceholder = document.getElementById("upload-placeholder");
-    const previewWrapper = document.getElementById("preview-wrapper");
-    const previewImage = document.getElementById("preview-image");
-    const form = document.getElementById("photo-form");
-    const validateBtn = form.querySelector(".btn-modal");
-    const titleInput = document.getElementById("title");
-
-    // Fonction pour activer/désactiver le bouton
+    // -- Activer/désactiver le bouton valider
     function updateValidateButtonState() {
         const file = imageInput.files[0];
         const title = titleInput.value.trim();
         const category = categorySelect.value;
-        validateBtn.disabled = !(file && title && category);
+
+        const isValid = !!file && title !== "" && category !== "";
+        validateBtn.disabled = !isValid;
     }
 
-    // Image sélectionnée
+    // -- Prévisualisation d’image
     imageInput.addEventListener("change", () => {
         const file = imageInput.files[0];
         if (file) {
             previewImage.src = URL.createObjectURL(file);
             previewWrapper.classList.remove("hidden");
             uploadPlaceholder.classList.add("hidden");
+        } else {
+            previewWrapper.classList.add("hidden");
+            uploadPlaceholder.classList.remove("hidden");
         }
         updateValidateButtonState();
     });
 
-    // Met à jour le bouton valider en fonction des champs
+    // -- Mise à jour du bouton lors des saisies
     titleInput.addEventListener("input", updateValidateButtonState);
     categorySelect.addEventListener("change", updateValidateButtonState);
+
+    // -- Envoi du formulaire
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const file = imageInput.files[0];
-        const title = document.getElementById("title").value;
+        const title = titleInput.value.trim();
         const category = categorySelect.value;
 
         if (!file || !title || !category) {
@@ -326,11 +345,20 @@ function setupModalSwitching(categories) {
             });
 
             if (!res.ok) throw new Error("Erreur lors de l'ajout de l'image");
+
             const works = await getworks();
             displayFilteredWorks(0, works);
-            displayWorksInModal(works); // mettre simplement les trois mêmes lignes
+            displayWorksInModal(works);
+
+            // Retour à la galerie
             viewAdd.classList.add("hidden");
             viewGallery.classList.remove("hidden");
+            form.reset();
+            previewWrapper.classList.add("hidden");
+            uploadPlaceholder.classList.remove("hidden");
+            previewImage.src = "";
+            validateBtn.disabled = true;
+
         } catch (err) {
             alert(err.message);
         }
@@ -343,7 +371,7 @@ function setupModalSwitching(categories) {
 async function init() {
     const works = await getworks();
     displayFilteredWorks(0, works);
-    displayWorksInModal(works); // mettre les trois premières dans la fonction init (copier coller)
+    displayWorksInModal(works); 
     const categories = await getcategories();
     displaycategories(categories, works);
     addEditButtonToProjectsTitle();
