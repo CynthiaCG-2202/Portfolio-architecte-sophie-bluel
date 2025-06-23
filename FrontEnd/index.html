@@ -40,22 +40,32 @@
 				<div class="title-modal">Ajout Photo</div>
 				<form id="photo-form">
 					<div class="upload-zone">
-						<input type="file" id="image-input" accept="image/*" required />
-						<div id="preview-container" class="hidden">
+						<div id="preview-wrapper" class="hidden">
 							<img id="preview-image" alt="Prévisualisation">
+						</div>
+						<div class="upload-placeholder" id="upload-placeholder">
+							<i class="fa-regular fa-image fa-4x"></i>
+							<label class="upload-btn" for="image-input">+ Ajouter photo</label>
+							<input type="file" id="image-input" accept="image/*" hidden required>
+							<p>jpg, png : 4mo max</p>
 						</div>
 					</div>
 
-					<label for="title">Titre</label>
-					<input type="text" id="title" required>
 
-					<label for="category">Catégorie</label>
-					<select id="category" required></select>
+					<div class="title-category">
+						<label for="title">Titre</label>
+						<input type="text" id="title" required>
 
-					<div class="btn-add"><button type="submit" class="btn-modal">Valider</button></div>
+						<label for="category">Catégorie</label>
+						<select id="category" required></select>
+					</div>
+					<div class="btn-add"><button type="submit" class="btn-modal">Valider</button>
+					</div>
+
 				</form>
 			</div>
 		</div>
+	</div>
 	</div>
 
 	<header>

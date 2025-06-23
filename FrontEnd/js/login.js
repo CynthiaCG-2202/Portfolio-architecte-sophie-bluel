@@ -3,7 +3,7 @@ function initLoginForm() {
     if (!form) return;
 
     form.addEventListener("submit", async (e) => {
-        e.preventDefault(); // Empêche le rechargement de la page
+        e.preventDefault();
 
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
@@ -32,8 +32,4 @@ function initLoginForm() {
     });
 }
 
-async function init() {
-    initLoginForm();
-}
-
-init();
+initLoginForm();

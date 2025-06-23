@@ -201,10 +201,9 @@ function displayWorksInModal(works) {
         figure.appendChild(btnSuppr);
         modalGallery.appendChild(figure);
     });
-
-    // Écouteurs sur les icônes supprimer
-    modalGallery.querySelectorAll(".btn-suppr").forEach(btn => {
-        btn.addEventListener("click", async (e) => {
+    // ajouter event dans la const au dessus
+    modalGallery.querySelectorAll(".btn-suppr").forEach(btn => { // à supprimer
+        btn.addEventListener("click", async (e) => { // à remonter
             const idToDelete = e.target.closest("button").dataset.id;
 
             const confirmed = confirm("Voulez-vous vraiment supprimer ce travail ?");
@@ -220,9 +219,9 @@ function displayWorksInModal(works) {
                 });
 
                 if (!res.ok) throw new Error("Erreur lors de la suppression");
-
-                // Recharge tout l'affichage après suppression pour garder la synchro
-                await init();
+                const works = await getworks();
+                displayFilteredWorks(0, works);
+                displayWorksInModal(works); // à mettre les trois lignes init
 
             } catch (err) {
                 alert(err.message);
@@ -233,10 +232,10 @@ function displayWorksInModal(works) {
 }
 
 // Rajouté pour éviter la duplication des images
-let modalSwitchingInitialized = false;
+let modalSwitchingInitialized = false; //
 
 function setupModalSwitching(categories) {
-    if (modalSwitchingInitialized) return; 
+    if (modalSwitchingInitialized) return;
     modalSwitchingInitialized = true;
 
     const btnOpenAdd = document.getElementById("open-add-photo");
@@ -246,10 +245,8 @@ function setupModalSwitching(categories) {
 
     const categorySelect = document.getElementById("category");
     const imageInput = document.getElementById("image-input");
-    const previewImage = document.getElementById("preview-image");
     const previewContainer = document.getElementById("preview-container");
 
-    // Pré-remplir les catégories
     categorySelect.innerHTML = "";
     categories.forEach(cat => {
         const option = document.createElement("option");
@@ -267,21 +264,40 @@ function setupModalSwitching(categories) {
         viewAdd.classList.add("hidden");
         viewGallery.classList.remove("hidden");
 
-        // Réinitialise le formulaire
         document.getElementById("photo-form").reset();
         previewContainer.classList.add("hidden");
         previewImage.src = "";
     });
 
+    const uploadPlaceholder = document.getElementById("upload-placeholder");
+    const previewWrapper = document.getElementById("preview-wrapper");
+    const previewImage = document.getElementById("preview-image");
+    const form = document.getElementById("photo-form");
+    const validateBtn = form.querySelector(".btn-modal");
+    const titleInput = document.getElementById("title");
+
+    // Fonction pour activer/désactiver le bouton
+    function updateValidateButtonState() {
+        const file = imageInput.files[0];
+        const title = titleInput.value.trim();
+        const category = categorySelect.value;
+        validateBtn.disabled = !(file && title && category);
+    }
+
+    // Image sélectionnée
     imageInput.addEventListener("change", () => {
         const file = imageInput.files[0];
         if (file) {
             previewImage.src = URL.createObjectURL(file);
-            previewContainer.classList.remove("hidden");
+            previewWrapper.classList.remove("hidden");
+            uploadPlaceholder.classList.add("hidden");
         }
+        updateValidateButtonState();
     });
 
-    const form = document.getElementById("photo-form");
+    // Met à jour le bouton valider en fonction des champs
+    titleInput.addEventListener("input", updateValidateButtonState);
+    categorySelect.addEventListener("change", updateValidateButtonState);
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -310,11 +326,9 @@ function setupModalSwitching(categories) {
             });
 
             if (!res.ok) throw new Error("Erreur lors de l'ajout de l'image");
-
-            // Recharge tout
-            await init();
-
-            // Revenir à la galerie
+            const works = await getworks();
+            displayFilteredWorks(0, works);
+            displayWorksInModal(works); // mettre simplement les trois mêmes lignes
             viewAdd.classList.add("hidden");
             viewGallery.classList.remove("hidden");
         } catch (err) {
@@ -329,7 +343,7 @@ function setupModalSwitching(categories) {
 async function init() {
     const works = await getworks();
     displayFilteredWorks(0, works);
-    displayWorksInModal(works);
+    displayWorksInModal(works); // mettre les trois premières dans la fonction init (copier coller)
     const categories = await getcategories();
     displaycategories(categories, works);
     addEditButtonToProjectsTitle();
