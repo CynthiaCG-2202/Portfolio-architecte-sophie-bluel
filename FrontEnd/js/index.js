@@ -194,16 +194,7 @@ function displayWorksInModal(works) {
         btnSuppr.classList.add("btn-suppr");
         btnSuppr.dataset.id = work.id;
         btnSuppr.setAttribute("aria-label", "Supprimer l'image");
-
-        btnSuppr.innerHTML = '<i class="fa-solid fa-trash"></i>';
-
-        figure.appendChild(img);
-        figure.appendChild(btnSuppr);
-        modalGallery.appendChild(figure);
-    });
-    // ajouter event dans la const au dessus
-    modalGallery.querySelectorAll(".btn-suppr").forEach(btn => { // à supprimer
-        btn.addEventListener("click", async (e) => { // à remonter
+        btnSuppr.addEventListener("click", async (e) => {
             const idToDelete = e.target.closest("button").dataset.id;
 
             const confirmed = confirm("Voulez-vous vraiment supprimer ce travail ?");
@@ -221,14 +212,21 @@ function displayWorksInModal(works) {
                 if (!res.ok) throw new Error("Erreur lors de la suppression");
                 const works = await getworks();
                 displayFilteredWorks(0, works);
-                displayWorksInModal(works); // à mettre les trois lignes init
+                displayWorksInModal(works);
 
             } catch (err) {
                 alert(err.message);
                 console.error(err);
             }
         });
+
+        btnSuppr.innerHTML = '<i class="fa-solid fa-trash"></i>';
+
+        figure.appendChild(img);
+        figure.appendChild(btnSuppr);
+        modalGallery.appendChild(figure);
     });
+    // ajouter event dans la const au dessus
 }
 
 // Rajouté pour éviter la duplication des images
@@ -254,7 +252,6 @@ function setupModalSwitching(categories) {
     const validateBtn = form.querySelector(".btn-modal");
     const titleInput = document.getElementById("title");
 
-    // -- Remplir le select avec une option par défaut
     categorySelect.innerHTML = "";
     const defaultOption = document.createElement("option");
     defaultOption.value = "";
@@ -270,13 +267,12 @@ function setupModalSwitching(categories) {
         categorySelect.appendChild(option);
     });
 
-    // -- Ouverture de la vue d'ajout
     btnOpenAdd.addEventListener("click", () => {
         viewGallery.classList.add("hidden");
         viewAdd.classList.remove("hidden");
     });
 
-    // -- Retour à la galerie
+    // Retour à la galerie
     backBtn.addEventListener("click", () => {
         viewAdd.classList.add("hidden");
         viewGallery.classList.remove("hidden");
@@ -288,7 +284,7 @@ function setupModalSwitching(categories) {
         validateBtn.disabled = true; // réinitialise le bouton
     });
 
-    // -- Activer/désactiver le bouton valider
+    //  Activer/désactiver le bouton valider
     function updateValidateButtonState() {
         const file = imageInput.files[0];
         const title = titleInput.value.trim();
@@ -298,7 +294,7 @@ function setupModalSwitching(categories) {
         validateBtn.disabled = !isValid;
     }
 
-    // -- Prévisualisation d’image
+    // Prévisualisation
     imageInput.addEventListener("change", () => {
         const file = imageInput.files[0];
         if (file) {
@@ -312,11 +308,11 @@ function setupModalSwitching(categories) {
         updateValidateButtonState();
     });
 
-    // -- Mise à jour du bouton lors des saisies
+    // MAJ Bouton
     titleInput.addEventListener("input", updateValidateButtonState);
     categorySelect.addEventListener("change", updateValidateButtonState);
 
-    // -- Envoi du formulaire
+    // Formulaire
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -365,13 +361,11 @@ function setupModalSwitching(categories) {
     });
 }
 
-
-
 // Récupération puis affichage
 async function init() {
     const works = await getworks();
     displayFilteredWorks(0, works);
-    displayWorksInModal(works); 
+    displayWorksInModal(works);
     const categories = await getcategories();
     displaycategories(categories, works);
     addEditButtonToProjectsTitle();
